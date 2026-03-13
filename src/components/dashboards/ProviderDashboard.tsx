@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Users, Calendar, Image, TrendingUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import LeadsTable from "@/components/dashboards/LeadsTable";
 import type { useUser } from "@clerk/nextjs";
 
 type User = NonNullable<ReturnType<typeof useUser>["user"]>;
@@ -55,6 +56,10 @@ export default function ProviderDashboard({ user }: { user: User }) {
             </Card>
           </motion.div>
         ))}
+      </div>
+
+      <div className="mt-8">
+        <LeadsTable title="לידים שלי" />
       </div>
     </div>
   );

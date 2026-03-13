@@ -404,6 +404,7 @@ class App {
   screen!: { width: number; height: number };
   viewport!: { width: number; height: number };
   raf: number = 0;
+  destroyed: boolean = false;
 
   boundOnResize!: () => void;
   boundOnWheel!: (e: Event) => void;
@@ -600,6 +601,7 @@ class App {
   }
 
   update() {
+    if (this.destroyed) return;
     this.scroll.current = lerp(this.scroll.current, this.scroll.target, this.scroll.ease);
     const direction = this.scroll.current > this.scroll.last ? 'right' : 'left';
     if (this.medias) {
@@ -628,6 +630,7 @@ class App {
   }
 
   destroy() {
+    this.destroyed = true;
     window.cancelAnimationFrame(this.raf);
     window.removeEventListener('resize', this.boundOnResize);
     window.removeEventListener('mousewheel', this.boundOnWheel);
