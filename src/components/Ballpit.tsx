@@ -670,7 +670,6 @@ function processPointerInteraction() {
 
 function onTouchStart(e: TouchEvent) {
   if (e.touches.length > 0) {
-    e.preventDefault();
     pointerPosition.set(e.touches[0].clientX, e.touches[0].clientY);
     for (const [elem, data] of pointerMap) {
       const rect = elem.getBoundingClientRect();
@@ -689,7 +688,6 @@ function onTouchStart(e: TouchEvent) {
 
 function onTouchMove(e: TouchEvent) {
   if (e.touches.length > 0) {
-    e.preventDefault();
     pointerPosition.set(e.touches[0].clientX, e.touches[0].clientY);
     for (const [elem, data] of pointerMap) {
       const rect = elem.getBoundingClientRect();
@@ -881,23 +879,26 @@ function createBallpit(
   const intersectionPoint = new Vector3();
   let isPaused = false;
 
-  canvas.style.touchAction = "none";
   canvas.style.userSelect = "none";
   (canvas.style as any).webkitUserSelect = "none";
 
-  const pointerData = createPointerData({
-    domElement: canvas,
-    onMove() {
-      raycaster.setFromCamera(pointerData.nPosition, threeInstance.camera);
-      threeInstance.camera.getWorldDirection(plane.normal);
-      raycaster.ray.intersectPlane(plane, intersectionPoint);
-      spheres.physics.center.copy(intersectionPoint);
-      spheres.config.controlSphere0 = true;
-    },
-    onLeave() {
-      spheres.config.controlSphere0 = false;
-    },
-  });
+  let pointerData: PointerData | null = null;
+  if (config.interactive !== false) {
+    canvas.style.touchAction = "none";
+    pointerData = createPointerData({
+      domElement: canvas,
+      onMove() {
+        raycaster.setFromCamera(pointerData!.nPosition, threeInstance.camera);
+        threeInstance.camera.getWorldDirection(plane.normal);
+        raycaster.ray.intersectPlane(plane, intersectionPoint);
+        spheres.physics.center.copy(intersectionPoint);
+        spheres.config.controlSphere0 = true;
+      },
+      onLeave() {
+        spheres.config.controlSphere0 = false;
+      },
+    });
+  }
   function initialize(cfg: any) {
     if (spheres) {
       threeInstance.clear();
@@ -925,7 +926,7 @@ function createBallpit(
       isPaused = !isPaused;
     },
     dispose() {
-      pointerData.dispose?.();
+      pointerData?.dispose?.();
       threeInstance.dispose();
     },
   };
@@ -934,12 +935,14 @@ function createBallpit(
 interface BallpitProps {
   className?: string;
   followCursor?: boolean;
+  interactive?: boolean;
   [key: string]: any;
 }
 
 const Ballpit: React.FC<BallpitProps> = ({
   className = "",
   followCursor = true,
+  interactive = true,
   ...props
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -954,6 +957,7 @@ const Ballpit: React.FC<BallpitProps> = ({
       if (!canvasRef.current) return;
       spheresInstanceRef.current = createBallpit(canvas, {
         followCursor,
+        interactive,
         ...props,
       });
     };

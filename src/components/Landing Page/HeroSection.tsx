@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Ballpit from "@/components/Ballpit";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,11 @@ import CircularGallery from "@/components/CircularGallery";
 import { fadeUp } from "@/lib/utils";
 
 const HeroSection = () => {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    setIsMobile(window.matchMedia("(pointer: coarse)").matches);
+  }, []);
+
   const eventGalleryItems = [
     {
       image:
@@ -72,6 +77,7 @@ const HeroSection = () => {
           friction={0.997}
           wallBounce={0.95}
           followCursor={false}
+          interactive={!isMobile}
           colors={[0x6366f1, 0xa855f7, 0xec4899]}
           ambientColor={0xffffff}
           ambientIntensity={1.5}
